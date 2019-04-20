@@ -35,9 +35,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="device.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
@@ -45,6 +42,12 @@
     <ClInclude Include="device.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="pch.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\LICENSE.txt" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{0AFD89C0-6CC7-49C0-9B53-5A39B9CD462C}</ProjectGuid>
