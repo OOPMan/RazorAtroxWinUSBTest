@@ -7,110 +7,12 @@
 // Evil global variables
 DEVICE_DATA                 deviceData{};
 HRESULT                     hr;
-USB_DEVICE_DESCRIPTOR deviceDesc;
+USB_DEVICE_DESCRIPTOR       deviceDesc;
 BOOL                        bResult;
 BOOL                        noDevice;
 ULONG                       lengthReceived;
-UCHAR				        deviceSpeed;
 RAZER_ATROX_BUTTON_STATE    buttonState{};
 RAZER_ATROX_DATA_PACKET     dataPacket{};
-
-BOOL GetUSBDeviceSpeed(WINUSB_INTERFACE_HANDLE hDeviceHandle, UCHAR* pDeviceSpeed)
-{
-    if (!pDeviceSpeed || hDeviceHandle == INVALID_HANDLE_VALUE)
-    {
-        return FALSE;
-    }
-
-    BOOL bResult = TRUE;
-
-    ULONG length = sizeof(UCHAR);
-
-    bResult = WinUsb_QueryDeviceInformation(hDeviceHandle, DEVICE_SPEED, &length, pDeviceSpeed);
-    if (!bResult)
-    {
-        printf("Error getting device speed: %d.\n", GetLastError());
-        goto done;
-    }
-    // See https://docs.microsoft.com/en-gb/windows/desktop/api/winusb/nf-winusb-winusb_querydeviceinformation
-    if (*pDeviceSpeed == LowSpeed)
-    {
-        printf("Device speed: %d (Full speed or lower).\n", *pDeviceSpeed);
-        goto done;
-    }
-    if (*pDeviceSpeed == HighSpeed)
-    {
-        printf("Device speed: %d (High speed).\n", *pDeviceSpeed);
-        goto done;
-    }
-
-done:
-    return bResult;
-}
-
-BOOL QueryDeviceEndpoints(WINUSB_INTERFACE_HANDLE hDeviceHandle, PIPE_ID* pipeid)
-{
-    if (hDeviceHandle == INVALID_HANDLE_VALUE)
-    {
-        return FALSE;
-    }
-
-    BOOL bResult = TRUE;
-
-    USB_INTERFACE_DESCRIPTOR InterfaceDescriptor;
-    ZeroMemory(&InterfaceDescriptor, sizeof(USB_INTERFACE_DESCRIPTOR));
-
-    WINUSB_PIPE_INFORMATION  Pipe;
-    ZeroMemory(&Pipe, sizeof(WINUSB_PIPE_INFORMATION));
-
-
-    bResult = WinUsb_QueryInterfaceSettings(hDeviceHandle, 0, &InterfaceDescriptor);
-
-    if (bResult)
-    {
-        for (int index = 0; index < InterfaceDescriptor.bNumEndpoints; index++)
-        {
-            bResult = WinUsb_QueryPipe(hDeviceHandle, 0, index, &Pipe);
-
-            if (bResult)
-            {
-                if (Pipe.PipeType == UsbdPipeTypeControl)
-                {
-                    printf("Endpoint index: %d Pipe type: Control Pipe ID: %d.\n", index, /*Pipe.PipeType,*/ Pipe.PipeId);
-                }
-                if (Pipe.PipeType == UsbdPipeTypeIsochronous)
-                {
-                    printf("Endpoint index: %d Pipe type: Isochronous Pipe ID: %d.\n", index, /*Pipe.PipeType,*/ Pipe.PipeId);
-                }
-                if (Pipe.PipeType == UsbdPipeTypeBulk)
-                {
-                    if (USB_ENDPOINT_DIRECTION_IN(Pipe.PipeId))
-                    {
-                        printf("Endpoint index: %d Pipe type: Bulk Pipe ID: %c.\n", index, /*Pipe.PipeType,*/ Pipe.PipeId);
-                        pipeid->PipeInId = Pipe.PipeId;
-                    }
-                    if (USB_ENDPOINT_DIRECTION_OUT(Pipe.PipeId))
-                    {
-                        printf("Endpoint index: %d Pipe type: Bulk Pipe ID: %c.\n", index, /*Pipe.PipeType,*/ Pipe.PipeId);
-                        pipeid->PipeOutId = Pipe.PipeId;
-                    }
-
-                }
-                if (Pipe.PipeType == UsbdPipeTypeInterrupt)
-                {
-                    printf("Endpoint index: %d Pipe type: Interrupt Pipe ID: %d.\nPolling Interval: %d\n", index, /*Pipe.PipeType,*/ Pipe.PipeId, Pipe.Interval);
-                }
-            }
-            else
-            {
-                continue;
-            }
-        }
-    }
-
-done:
-    return bResult;
-}
 
 BOOL InitRazerAtrox(WINUSB_INTERFACE_HANDLE hDeviceHandle)
 {
@@ -217,8 +119,8 @@ RAZER_ATROX_PACKET_TYPES processDatapacket(RAZER_ATROX_DATA_PACKET &dataPacket, 
         buttonState.buttonMenu =    dataPacket.data[04] & 0x04;
         buttonState.buttonView =    dataPacket.data[04] & 0x08;
         buttonState.stickUp =       dataPacket.data[05] & 0x01;
-        buttonState.stickLeft =     dataPacket.data[05] & 0x02;
-        buttonState.stickDown =     dataPacket.data[05] & 0x04;
+        buttonState.stickDown =     dataPacket.data[05] & 0x02;
+        buttonState.stickLeft =     dataPacket.data[05] & 0x04;
         buttonState.stickRight =    dataPacket.data[05] & 0x08;
         return BUTTON_INPUT;
     }
@@ -285,7 +187,7 @@ void mainLoop()
         mvaddstr(6, 15, buttonState.stickDown       ? "DOWN" : "");
         mvaddstr(5, 21, buttonState.stickRight      ? "RIGHT" : "");
         // Process guide button hold
-        mvaddstr(8, 0, "Hold Guide button for 5 seconds then release to quit");        
+        mvaddstr(8, 0, "Hold Guide button for 5 or more seconds then release to quit");        
         if (buttonState.buttonGuide != previousGuideButtonState) { // Guide button state has changed            
             if (previousGuideButtonState) { // Button was being pressed, has been released
                 guideUp = GetTickCount64(); 
