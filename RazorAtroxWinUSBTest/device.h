@@ -7,13 +7,10 @@
 // Device Interface GUID.
 // Used by all WinUsb devices that this application talks to.
 // Must match "DeviceInterfaceGUIDs" registry value specified in the INF file.
-// 98d6aa6f-518a-42f3-a6b5-e752c4996116
 //
-// 9B65FE78-9976-4E8A-A28D-6C E3 4B E8 32 9D
-DEFINE_GUID(GUID_DEVINTERFACE_USBApplication2,	
-	0x9b65fe78,0x9976,0x4e8a,0xa2,0x8d,0x6c,0xe3,0x4b,0xe8,0x32,0x9d);
-    //0x98d6aa6f,0x518a,0x42f3,0xa6,0xb5,0xe7,0x52,0xc4,0x99,0x61,0x16
-	//);
+// 5ACF052A-3BE5-46AE-905E-356BA17671BD
+DEFINE_GUID(GUID_DEVINTERFACE_RazorAtroxWinUSBTest,
+    0x5ACF052A, 0x3BE5, 0x46AE, 0x90, 0x5E, 0x35, 0x6B, 0xA1, 0x76, 0x71, 0xBD);
 
 typedef struct _DEVICE_DATA {
 
